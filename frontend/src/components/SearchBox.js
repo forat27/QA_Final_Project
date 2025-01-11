@@ -29,6 +29,7 @@ function SearchBox() {
   return (
     <Form onSubmit={submitHandler} className="d-flex">
       <Form.Control
+        style={{width: '300px', borderRadius: '10px', border: 'solid #3f72af 0.5px'}}
         type="text"
         name="q"
         onChange={(e) => setKeyword(e.target.value)}

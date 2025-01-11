@@ -32,11 +32,11 @@ function Header() {
 
   return (
     <header>
-      <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
+      <Navbar bg="light" variant="#light " expand="lg" collapseOnSelect>
         <Container>
           <LinkContainer to="/">
             <Navbar.Brand>
-              <img src={logo} alt="Otaku Shop" />
+              <img style={{width: '200px', hight: '50px'}} src={logo} alt="guitaria" />
             </Navbar.Brand>
           </LinkContainer>
 

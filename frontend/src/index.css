@@ -3,6 +3,20 @@ main {
   min-height: 80vh;
 }
 
+.btn-outline-success{
+  border-color: #3f72af !important;
+  color: #3f72af !important;
+}
+
+.btn-outline-success:hover{
+  color: #fff !important;
+  background-color: #3f72af !important;
+}
+
+.btn-outline-success:focus{
+  box-shadow: 0 0 0 0.2rem #e5e1da !important;
+}
+
 /* Product.js */
 h3 {
   padding: 1rem 0;
@@ -54,6 +68,11 @@ h2 {
 
 .carousel a {
   margin: 0 auto;
+}
+
+.carousel-item{
+  /* background-color: #e5e1da; */
+  background-color: #A5BFCC;
 }
 
 @media (max-width: 900px) {
