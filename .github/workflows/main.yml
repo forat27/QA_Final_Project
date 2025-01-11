@@ -1,0 +1,113 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Upload code
+        uses: actions/upload-artifact@v4
+        with:
+          name: code
+          path: .
+          retention-days: 1
+
+  build:
+    needs: source
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download code
+        uses: actions/download-artifact@v4
+        with:
+          name: code
+          path: .
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10.4'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m venv .venv
+          ls -l .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Cache the virtual environment instead of uploading it as an artifact
+      - name: Cache virtual environment
+        uses: actions/cache@v3
+        with:
+          path: backend/.venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            venv-${{ runner.os }}-
+            venv-
+       
+
+      - name: Install npm packages and run build command
+        run: |
+          cd ./frontend
+          export NODE_OPTIONS=--openssl-legacy-provider
+          npm install
+          npm run build
+
+
+      - name: Upload code
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-${{ github.run_id }}
+          path: .
+          retention-days: 1
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download code
+        uses: actions/download-artifact@v4
+        with:
+          name: code
+          path: .
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10.4'
+          cache: 'pip'
+
+      # Restore the cached virtual environment
+      - name: Cache virtual environment
+        uses: actions/cache@v3
+        with:
+          path: backend/.venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            venv-${{ runner.os }}-
+            venv-
+     
+      - name: Run tests
+        working-directory: ./backend
+        run: |
+          source .venv/bin/activate
+          pytest
+
+      - name: Upload code
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-${{ github.run_id }}
+          path: .
+          retention-days: 1
+  
