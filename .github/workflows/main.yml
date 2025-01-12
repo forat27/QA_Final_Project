@@ -1,6 +1,7 @@
 name: CI/CD Pipeline
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -125,7 +126,7 @@ jobs:
           source .venv/bin/activate
           cd ./frontend
           npm install
-          npm run build:local
+          npm run build
           cd ../backend
           python manage.py collectstatic --noinput
           python manage.py runserver &
