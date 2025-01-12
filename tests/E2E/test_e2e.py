@@ -133,6 +133,39 @@ class TestE2E:
             assert len(products_title) == 0, f"Expected no results for '{search_input}', but found {len(products_title)} products."
 
 
+# create product without image
+    def test_create_product_without_image(self):
+        self.driver.find_element(By.CSS_SELECTOR, ".nav-link:nth-child(2)").click()
+        self.driver.find_element(By.ID, "email").click()
+        self.driver.find_element(By.ID, "email").send_keys("fo.7@gmail.com")
+        self.driver.find_element(By.ID, "password").click()
+        self.driver.find_element(By.ID, "password").send_keys("Forat12345")
+        self.driver.find_element(By.CSS_SELECTOR, ".mt-3").click()
+        # Wait for the admin menu to be clickable
+        admin_menu = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.ID, "adminmenu"))
+        )
+        admin_menu.click()
+        self.driver.find_element(By.LINK_TEXT, "Products").click()
+        self.driver.find_element(By.CSS_SELECTOR, ".my-3").click()
+        time.sleep(2)
+        elem = self.driver.find_element(By.TAG_NAME, "html")
+        elem.send_keys(Keys.END)
+        elem.send_keys(Keys.END)
+        elem.send_keys(Keys.END)
+        time.sleep(1)
+        button = self.driver.find_element(By.XPATH, '//button[contains(text(), "Update")]')
+        button.click()
+        # Scroll to the top using JavaScript
+        self.driver.execute_script("window.scrollTo(0, 0);")
+        time.sleep(2)
+        product_cell = WebDriverWait(self.driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, "//td[text()=' Product Name ']"))
+    )
+        # Assert that the product cell is found
+        assert product_cell is not None
+        print("Product 'Product Name' found successfully.")
+
 # complete registration
     def test_complete_registration(self):
         name="TEST"
