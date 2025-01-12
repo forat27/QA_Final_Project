@@ -1,6 +1,7 @@
 name: CI/CD Pipeline
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -17,7 +18,7 @@ jobs:
       - name: Upload code
         uses: actions/upload-artifact@v4
         with:
-          name: source-code
+          name: code
           path: .
           retention-days: 1
 
@@ -25,10 +26,15 @@ jobs:
     needs: source
     runs-on: ubuntu-latest
     steps:
+      - name: Delete old artifacts
+        uses: geekyeggo/delete-artifact@v2
+        with:
+          name: code
+      
       - name: Download code
         uses: actions/download-artifact@v4
         with:
-          name: source-code
+          name: code
           path: .
 
       - name: Set up Python
@@ -38,48 +44,51 @@ jobs:
           cache: 'pip'
 
       - name: Install dependencies
-        working-directory: ./backend
         run: |
           python -m venv .venv
-          ls -l .venv
           source .venv/bin/activate
           pip install --upgrade pip
-          pip install -r requirements.txt
+          if [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          else
+            echo "Error: requirements.txt is not found"
+            exit 1
+          fi
+
+      - name: Install npm packages and rub build command
+        run: |
+          cd ./frontend
+          npm install
+          npm run build
+          rm -rf node_modules
 
       # Cache the virtual environment instead of uploading it as an artifact
       - name: Cache virtual environment
         uses: actions/cache@v3
         with:
-          path: backend/.venv
+          path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             venv-${{ runner.os }}-
-            venv-
-       
-
-      - name: Install npm packages and run build command
-        run: |
-          cd ./frontend
-          export NODE_OPTIONS=--openssl-legacy-provider
-          npm install
-          npm run build
-
 
       - name: Upload code
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts-${{ github.run_id }}
+          name: code
           path: .
+          overwrite: true
           retention-days: 1
 
   test:
     needs: build
     runs-on: ubuntu-latest
+    outputs:
+      artifact-url: ${{ steps.upload-test-report.outputs.artifact-url }}
     steps:
       - name: Download code
         uses: actions/download-artifact@v4
         with:
-          name: build-artifacts-${{ github.run_id }}
+          name: code
           path: .
 
       - name: Set up Python
@@ -92,25 +101,31 @@ jobs:
       - name: Cache virtual environment
         uses: actions/cache@v3
         with:
-          path: backend/.venv
+          path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             venv-${{ runner.os }}-
-            venv-
-     
+      
+      
       - name: Run tests
-        working-directory: ./backend
         run: |
           source .venv/bin/activate
-          pytest
-
-      - name: Upload code
+          cd ./frontend
+          npm install
+          npm run build
+          cd ..
+          python manage.py collectstatic --noinput
+          python manage.py runserver &
+          pytest --html-report=./report/report.html --title='PYTEST REPORT'
+      
+      - name: Upload test report
+        id: upload-test-report
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports-${{ github.run_id }}
-          path: .
-          retention-days: 1
-  
+          name: test-report
+          path: ./backend/report
+
   deploy:
     if: success()
     needs: test
@@ -119,7 +134,7 @@ jobs:
       - name: Download code
         uses: actions/download-artifact@v4
         with:
-          name: test-reports-${{ github.run_id }}
+          name: code
           path: .
 
       - name: Build Docker Image
