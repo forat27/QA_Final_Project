@@ -22,6 +22,27 @@ h3 {
   padding: 1rem 0;
 }
 
+.img-fluid.rounded{
+  height: 200px !important;
+  width: 100px !important;
+
+}
+
+.card-img{
+  border-radius: 15px !important;
+  height: 300px !important;
+  width: 220px !important;
+}
+
+.col-xl-3 col-lg-4 col-md-6 col-sm-12{
+  border-radius: 15px !important;
+  padding: 20px       !important;
+  background-color: #f8f9fa!important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  height: 500px !important;
+  width: 320px !important;
+}
+
 /* Rating.js */
 .rating span {
   margin: 0.1rem;
