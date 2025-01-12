@@ -1,1 +1,17 @@
-/**/env
+# python project gitignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# django project gitignore
+*.log
+*.pot
+*.pyc
+*.pyo
+*.swp
+*.sql
+media
+static
+.env
+.venv
