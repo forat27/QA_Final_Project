@@ -146,10 +146,12 @@ jobs:
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
           docker push ${{ secrets.DOCKER_USERNAME }}/qa_final:latest
           
-      - name: Deploy to render.com
-        uses: gh-actions-workflows/deploy-docker-render@v1.1
-        with:
-          deploy-hook: ${{ secrets.RENDER_DEPLOY_HOOK }}
-          image-url: ${{ secrets.DOCKER_USERNAME }}/qa_final:latest
-          render-api-key: ${{ secrets.RENDER_TOKEN }}
-          wait-for-deployment: true
+      # - name: Deploy to render.com
+      #   uses: gh-actions-workflows/deploy-docker-render@v1.1
+      #   with:
+      #     deploy-hook: ${{ secrets.RENDER_DEPLOY_HOOK }}
+      #     image-url: ${{ secrets.DOCKER_USERNAME }}/qa_final:latest
+      #     render-api-key: ${{ secrets.RENDER_TOKEN }}
+      #     wait-for-deployment: true
+
+      
