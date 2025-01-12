@@ -127,7 +127,7 @@ jobs:
           cd ./frontend
           npm install
           npm run build
-          cd ../backend
+          cd ..
           python manage.py collectstatic --noinput
           python manage.py runserver &
           pytest --html-report=./report/report.html --title='PYTEST REPORT'
